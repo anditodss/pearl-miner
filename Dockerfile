@@ -8,16 +8,19 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-# Download v1.1.1 — note: different tar structure than v1.0.7
-# v1.0.7: extracts directly as "miner"
-# v1.1.1: extracts into "pearlfortune/miner" subfolder
+# Download v1.1.1 and extract
 RUN wget -c https://github.com/pearlfortune/pearl-miner/releases/download/v1.1.1/pearlfortune-v1.1.1.tar.gz \
     && tar vxzf pearlfortune-v1.1.1.tar.gz \
-    && chmod +x pearlfortune/miner \
-    && rm pearlfortune-v1.1.1.tar.gz
+    && rm pearlfortune-v1.1.1.tar.gz \
+    && echo "=== Listing all extracted files ===" \
+    && find /app -type f \
+    && echo "=== Done ==="
 
-# Copy entrypoint (LF line endings enforced via .gitattributes)
+# Make all extracted binaries executable
+RUN find /app -type f -exec chmod +x {} \;
+
+# Copy entrypoint and FIX CRLF line endings inside the Dockerfile itself
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
