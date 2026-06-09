@@ -1,0 +1,17 @@
+services:
+  pearl-miner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: my-pearl-miner:latest
+    container_name: pearl-miner
+    restart: unless-stopped
+    env_file:
+      - .env
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
