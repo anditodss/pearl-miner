@@ -10,10 +10,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Download and extract the official pearl-miner binary from GitHub Releases
 RUN wget -c https://github.com/pearlfortune/pearl-miner/releases/download/v1.1.1/pearlfortune-v1.1.1.tar.gz \
     && tar vxzf pearlfortune-v1.1.1.tar.gz \
-    && chmod +x /pearlfortune/miner \
     && rm pearlfortune-v1.1.1.tar.gz
 
-# Copy our custom entrypoint
+# Show what was extracted (helps debug path issues)
+RUN echo "=== Extracted files ===" && find / -name "miner" -type f 2>/dev/null && echo "======================="
+
+# Make miner executable wherever it is
+RUN find / -name "miner" -type f -exec chmod +x {} \; 2>/dev/null || true
+
+# Copy our custom entrypoint (LF line endings enforced via .gitattributes)
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 

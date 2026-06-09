@@ -16,7 +16,18 @@ echo "  Address: $ADDRESS"
 echo "  Worker : $WORKER"
 echo "=============================="
 
-exec /pearlfortune/miner \
+# Find the miner binary dynamically
+MINER_BIN=$(find / -name "miner" -type f 2>/dev/null | head -1)
+
+if [ -z "$MINER_BIN" ]; then
+  echo "ERROR: miner binary not found!"
+  exit 1
+fi
+
+echo "  Binary : $MINER_BIN"
+echo "=============================="
+
+exec "$MINER_BIN" \
     --proxy "$PROXY" \
     --address "$ADDRESS" \
     --worker "$WORKER" \
