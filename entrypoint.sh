@@ -9,25 +9,15 @@ ADDRESS="${ADDRESS:-your_prl_address_here}"
 WORKER="${WORKER:-$(hostname)}"
 
 echo "=============================="
-echo "  Pearl Fortune Miner"
+echo "  Pearl Fortune Miner v1.1.1"
 echo "=============================="
 echo "  Proxy  : $PROXY"
 echo "  Address: $ADDRESS"
 echo "  Worker : $WORKER"
+echo "  Binary : /app/pearlfortune/miner"
 echo "=============================="
 
-# Find the miner binary dynamically
-MINER_BIN=$(find / -name "miner" -type f 2>/dev/null | head -1)
-
-if [ -z "$MINER_BIN" ]; then
-  echo "ERROR: miner binary not found!"
-  exit 1
-fi
-
-echo "  Binary : $MINER_BIN"
-echo "=============================="
-
-exec "$MINER_BIN" \
+exec /app/pearlfortune/miner \
     --proxy "$PROXY" \
     --address "$ADDRESS" \
     --worker "$WORKER" \

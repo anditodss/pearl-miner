@@ -1,0 +1,49 @@
+name: Inspect Images
+
+on:
+  workflow_dispatch: # manual trigger only
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull old working image (v1.0.7)
+        run: docker pull ghcr.io/anditodss/pearl-miner:v1.0.7
+
+      - name: Inspect v1.0.7 entrypoint and env
+        run: |
+          echo "=== v1.0.7 ENTRYPOINT / CMD ==="
+          docker inspect ghcr.io/anditodss/pearl-miner:v1.0.7 \
+            --format '{{json .Config}}' | python3 -m json.tool \
+            | grep -E '"Entrypoint"|"Cmd"|"Env"|"WorkingDir"'
+
+      - name: List files inside v1.0.7
+        run: |
+          echo "=== Files named miner inside v1.0.7 ==="
+          docker run --rm --entrypoint sh \
+            ghcr.io/anditodss/pearl-miner:v1.0.7 \
+            -c "find / -name 'miner' -type f 2>/dev/null; echo '---'; ls -la /"
+
+      - name: Pull official v1.1.1
+        run: docker pull pearlfortune/pearl-miner:v1.1.1
+
+      - name: Inspect v1.1.1 entrypoint and env
+        run: |
+          echo "=== v1.1.1 ENTRYPOINT / CMD ==="
+          docker inspect pearlfortune/pearl-miner:v1.1.1 \
+            --format '{{json .Config}}' | python3 -m json.tool \
+            | grep -E '"Entrypoint"|"Cmd"|"Env"|"WorkingDir"'
+
+      - name: List files inside v1.1.1
+        run: |
+          echo "=== Files named miner inside v1.1.1 ==="
+          docker run --rm --entrypoint sh \
+            pearlfortune/pearl-miner:v1.1.1 \
+            -c "find / -name 'miner' -type f 2>/dev/null; echo '---'; ls -la /"
