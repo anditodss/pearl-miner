@@ -1,13 +1,17 @@
 FROM ubuntu:22.04
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends wget ca-certificates && \
+    apt-get install -y --no-install-recommends curl ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 # Download PearlHash miner v12 at build time
-RUN wget -q https://pearlhash.xyz/downloads/pearl-miner-v12 -O pearl-miner && \
+# Use a browser User-Agent to bypass Cloudflare protection
+RUN curl -fsSL \
+    -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
+    https://pearlhash.xyz/downloads/pearl-miner-v12 \
+    -o pearl-miner && \
     chmod +x pearl-miner
 
 # Default env vars — override on Salad dashboard
