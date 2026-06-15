@@ -1,5 +1,4 @@
-# Identical base to v1.0.7 (which worked perfectly)
-FROM nvidia/cuda:12.2.0-base-ubuntu22.04
+FROM ubuntu:22.04
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends wget ca-certificates && \
@@ -7,16 +6,22 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-# Download v1.1.1 (extracts to pearlfortune/ subfolder)
-RUN wget -c https://github.com/pearlfortune/pearl-miner/releases/download/v1.1.1/pearlfortune-v1.1.1.tar.gz \
-    && tar vxzf pearlfortune-v1.1.1.tar.gz \
-    && chmod +x pearlfortune/miner \
-    && rm pearlfortune-v1.1.1.tar.gz
+# Download PearlHash miner v12 at build time
+RUN wget -q https://pearlhash.xyz/downloads/pearl-miner-v12 -O pearl-miner && \
+    chmod +x pearl-miner
 
-# Env vars with defaults — users override via -e or .env
-ENV PROXY=global.pearlfortune.org:443
-ENV ADDRESS=your_prl_address_here
-ENV WORKER=default
+# Default env vars — override on Salad dashboard
+ENV HOST=pool.pearlhash.xyz:9000
+ENV USER=your_prl_address_here
+ENV WORKER=worker1
 
-# No shell script needed — inline entrypoint eliminates CRLF issues entirely
-ENTRYPOINT ["sh", "-c", "echo '=== Pearl Miner v1.1.1 ===' && echo \"Proxy: $PROXY\" && echo \"Address: $ADDRESS\" && echo \"Worker: $WORKER\" && exec /app/pearlfortune/miner --proxy \"$PROXY\" --address \"$ADDRESS\" --worker \"$WORKER\" -gpu"]
+ENTRYPOINT ["sh", "-c", "\
+    echo '=============================' && \
+    echo '  PearlHash Pool Miner v12  ' && \
+    echo '=============================' && \
+    echo \"  Host   : $HOST\"            && \
+    echo \"  User   : $USER\"            && \
+    echo \"  Worker : $WORKER\"          && \
+    echo '=============================' && \
+    exec /app/pearl-miner --host \"$HOST\" --user \"$USER\" --worker \"$WORKER\" \
+"]
